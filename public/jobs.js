@@ -33,13 +33,39 @@ export const handleJobs = () => {
                 jobsTable.replaceChildren([jobsTableHeader]);
 
                 showLoginRegister();
-            
+
             } else if (e.target.classList.contains("editButton")) {
                 message.textContent = "";
                 showAddEdit(e.target.dataset.id);
+            } else if (e.target.classList.contains("deleteButton")) {
+                const jobId = e.target.dataset.id;
+                handleDeleteJob(jobId);
             }
         }
     });
+};
+const handleDeleteJob = async (jobId) => {
+    try {
+        enableInput(false);
+        const response = await fetch(`/api/v1/jobs/${jobId}`, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        if (response.ok) {
+            message.textContent = "The job entry was deleted.";
+            showJobs();
+        } else {
+            const data = await response.json();
+            message.textContent = data.msg || "Failed to delete job entry.";
+        }
+    } catch (err) {
+        console.error(err);
+        message.textContent = "A communication error occurred.";
+    } finally {
+        enableInput(true);
+    }
 };
 
 export const showJobs = async () => {
